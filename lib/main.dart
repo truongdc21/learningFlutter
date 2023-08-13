@@ -6,10 +6,10 @@ void main() {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.amber,
-          title: Text("Lear Flutter"),
+          title: const Text("Lear Flutter"),
         ),
         body: Center(
-          child: MyWidget(true),
+          child: MyWidget2(false),
         ),
       ),
     ),
@@ -17,6 +17,7 @@ void main() {
   ));
 }
 
+/// Stateless *
 class MyWidget extends StatelessWidget {
   final bool isLoading;
 
@@ -32,6 +33,7 @@ class MyWidget extends StatelessWidget {
   }
 }
 
+/// Stateful *
 class MyWidget2 extends StatefulWidget {
   final bool isLoading;
 
@@ -44,10 +46,26 @@ class MyWidget2 extends StatefulWidget {
 }
 
 class MyWidget2State extends State<MyWidget2> {
+
+  late bool _localLoading ;
+
+  /// initSate is function run before function @build
+  @override
+  void initState() {
+    super.initState();
+    _localLoading = widget.isLoading;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return widget.isLoading
+    return _localLoading
         ? const CircularProgressIndicator()
-        : const Text("Stateful");
+        : FloatingActionButton(onPressed: onClickButton);
+  }
+
+  void onClickButton() {
+    setState(() {
+      _localLoading = true ;
+    });
   }
 }
