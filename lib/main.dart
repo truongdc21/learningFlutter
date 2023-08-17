@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:learn_flutter/radio/radio_button.dart';
+import 'package:learn_flutter/slider/slider.dart';
+import 'package:learn_flutter/switch/switch.dart';
+import 'package:learn_flutter/text_field/text_field.dart';
+
+import 'check_box/my_checkbox.dart';
+import 'text_field/demo_login.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -6,10 +13,10 @@ void main() {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.amber,
-          title: const Text("Lear Flutter"),
+          title: const Text("Learn Flutter"),
         ),
         body: Center(
-          child: MyWidget2(false),
+          child: MySlider2(),
         ),
       ),
     ),
@@ -17,55 +24,4 @@ void main() {
   ));
 }
 
-/// Stateless *
-class MyWidget extends StatelessWidget {
-  final bool isLoading;
 
-  MyWidget(this.isLoading);
-
-  @override
-  Widget build(BuildContext context) {
-    if (isLoading) {
-      return const CircularProgressIndicator();
-    } else {
-      return const Text(" Stateless");
-    }
-  }
-}
-
-/// Stateful *
-class MyWidget2 extends StatefulWidget {
-  final bool isLoading;
-
-  MyWidget2(this.isLoading);
-
-  @override
-  State<StatefulWidget> createState() {
-    return MyWidget2State();
-  }
-}
-
-class MyWidget2State extends State<MyWidget2> {
-
-  late bool _localLoading ;
-
-  /// initSate is function run before function @build
-  @override
-  void initState() {
-    super.initState();
-    _localLoading = widget.isLoading;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _localLoading
-        ? const CircularProgressIndicator()
-        : FloatingActionButton(onPressed: onClickButton);
-  }
-
-  void onClickButton() {
-    setState(() {
-      _localLoading = true ;
-    });
-  }
-}
