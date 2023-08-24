@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(MaterialApp(
     home: SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.amber,
-          title: const Text("Lear Flutter"),
-        ),
-        body: Center(
-          child: MyWidget2(false),
+      child:  ChangeNotifierProvider(
+        create: (_) => CounterProvider(),
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.amber,
+            title: const Text("Lear Flutter - Provider"),
+          ),
+          body: const CounterHome(),
         ),
       ),
     ),
@@ -17,55 +19,44 @@ void main() {
   ));
 }
 
-/// Stateless *
-class MyWidget extends StatelessWidget {
-  final bool isLoading;
+class CounterProvider extends ChangeNotifier {
+  int _counter = 0;
 
-  MyWidget(this.isLoading);
+  int get counter => _counter;
+
+  void add() {
+    _counter++;
+    notifyListeners();
+  }
+}
+class CounterHome extends StatelessWidget {
+  const CounterHome({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const CircularProgressIndicator();
-    } else {
-      return const Text(" Stateless");
-    }
-  }
-}
-
-/// Stateful *
-class MyWidget2 extends StatefulWidget {
-  final bool isLoading;
-
-  MyWidget2(this.isLoading);
-
-  @override
-  State<StatefulWidget> createState() {
-    return MyWidget2State();
-  }
-}
-
-class MyWidget2State extends State<MyWidget2> {
-
-  late bool _localLoading ;
-
-  /// initSate is function run before function @build
-  @override
-  void initState() {
-    super.initState();
-    _localLoading = widget.isLoading;
+    final watchCounterProvider = context.watch<CounterProvider>();
+    final readCounterProvider = context.read<CounterProvider>();
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 50.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Text(
+                watchCounterProvider.counter.toString(),
+                style: const TextStyle(fontSize: 50),
+            ),
+            const SizedBox(height: 50,),
+            ElevatedButton(
+                onPressed: () {
+                  readCounterProvider.add();
+                },
+                child: const Text('Add Counter ++'),
+            )
+          ],
+        ),
+      ),
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return _localLoading
-        ? const CircularProgressIndicator()
-        : FloatingActionButton(onPressed: onClickButton);
-  }
-
-  void onClickButton() {
-    setState(() {
-      _localLoading = true ;
-    });
-  }
 }
