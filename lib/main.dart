@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -6,10 +8,10 @@ void main() {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.amber,
-          title: const Text("Lear Flutter"),
+          title: const Text("Learn Flutter - Hooks"),
         ),
-        body: Center(
-          child: MyWidget2(false),
+        body: const Center(
+          child: HomeScreen(),
         ),
       ),
     ),
@@ -17,55 +19,42 @@ void main() {
   ));
 }
 
-/// Stateless *
-class MyWidget extends StatelessWidget {
-  final bool isLoading;
-
-  MyWidget(this.isLoading);
-
+class HomeScreen extends HookWidget {
+  const HomeScreen({super.key});
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const CircularProgressIndicator();
-    } else {
-      return const Text(" Stateless");
-    }
+    final count = useState(0);
+    final theme = useContext();
+
+    useEffect(() {
+      print('Effect ran. Count: ${count.value}');
+      return () {
+        print('Effect cleaned up. Count: ${count.value}');
+      };
+    }, [count.value]);
+
+    final increment = useCallback(() {
+      count.value++;
+    }, [count.value]);
+    return  Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text("Count : ${count.value}"),
+        const SizedBox(height: 50,),
+        ElevatedButton(onPressed: () {
+          count.value ++;
+        }, child: const Text("Count plus"))
+      ],
+    );
   }
+  
 }
 
-/// Stateful *
-class MyWidget2 extends StatefulWidget {
-  final bool isLoading;
-
-  MyWidget2(this.isLoading);
-
+class HomeDetailt extends HookConsumerWidget {
+  const HomeDetailt({super.key});
   @override
-  State<StatefulWidget> createState() {
-    return MyWidget2State();
-  }
-}
-
-class MyWidget2State extends State<MyWidget2> {
-
-  late bool _localLoading ;
-
-  /// initSate is function run before function @build
-  @override
-  void initState() {
-    super.initState();
-    _localLoading = widget.isLoading;
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Container();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return _localLoading
-        ? const CircularProgressIndicator()
-        : FloatingActionButton(onPressed: onClickButton);
-  }
-
-  void onClickButton() {
-    setState(() {
-      _localLoading = true ;
-    });
-  }
 }
