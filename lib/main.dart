@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -6,10 +9,10 @@ void main() {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.amber,
-          title: const Text("Lear Flutter"),
+          title: const Text("Learn Flutter"),
         ),
-        body: Center(
-          child: MyWidget2(false),
+        body: const Center(
+          child: HomeScreen(),
         ),
       ),
     ),
@@ -17,55 +20,68 @@ void main() {
   ));
 }
 
-/// Stateless *
-class MyWidget extends StatelessWidget {
-  final bool isLoading;
-
-  MyWidget(this.isLoading);
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const CircularProgressIndicator();
+    _connectNetWork();
+    return Container();
+  }
+}
+
+Future<void> _connectNetWork() async {
+  final client = HttpClient();
+  try {
+    var url = Uri.parse("https://5f9ab7d89d94640016f711f4.mockapi.io/weather");
+    final request = await client.getUrl(url);
+    final response = await request.close();
+
+    if (response.statusCode == HttpStatus.ok) {
+      final responseBody = await response.transform(utf8.decoder).join();
+      final jsonMap = json.decode(responseBody);
+      final user = User.fromJson(jsonMap);
+      var username = user.username;
+      print(username);
     } else {
-      return const Text(" Stateless");
+      print('Status code : ${response.statusCode}');
     }
+  } catch (e) {
+    print(e);
+  } finally {
+    client.close();
   }
 }
 
-/// Stateful *
-class MyWidget2 extends StatefulWidget {
-  final bool isLoading;
+class User {
+  final int id;
+  final String username;
+  final String password;
+  final Type type;
 
-  MyWidget2(this.isLoading);
+  User(
+      {required this.id,
+      required this.username,
+      required this.password,
+      required this.type});
 
-  @override
-  State<StatefulWidget> createState() {
-    return MyWidget2State();
+  factory User.fromJson(Map<String, dynamic> json) {
+    final type = json['type'];
+    return User(
+        id: json['Id'],
+        username: json['user'],
+        password: json['pwd'],
+        type: Type.fromJson(type));
   }
 }
 
-class MyWidget2State extends State<MyWidget2> {
+class Type {
+  final String name;
+  final int typeNumber;
 
-  late bool _localLoading ;
+  Type({required this.name, required this.typeNumber});
 
-  /// initSate is function run before function @build
-  @override
-  void initState() {
-    super.initState();
-    _localLoading = widget.isLoading;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _localLoading
-        ? const CircularProgressIndicator()
-        : FloatingActionButton(onPressed: onClickButton);
-  }
-
-  void onClickButton() {
-    setState(() {
-      _localLoading = true ;
-    });
+  factory Type.fromJson(Map<String, dynamic> json) {
+    return Type(name: json['name'], typeNumber: json['typeNumber']);
   }
 }
