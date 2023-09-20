@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -8,8 +10,8 @@ void main() {
           backgroundColor: Colors.amber,
           title: const Text("Lear Flutter"),
         ),
-        body: Center(
-          child: MyWidget2(false),
+        body: const Center(
+          child: MyScreen(),
         ),
       ),
     ),
@@ -17,55 +19,45 @@ void main() {
   ));
 }
 
-/// Stateless *
-class MyWidget extends StatelessWidget {
-  final bool isLoading;
-
-  MyWidget(this.isLoading);
+class MyScreen extends StatelessWidget {
+  const MyScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const CircularProgressIndicator();
-    } else {
-      return const Text(" Stateless");
-    }
+    mainTest(context);
+    return Container();
+  }
+
+  void mainTest(BuildContext context){
+    getInt2(context);
+    getInt1(context);
+  }
+
+  Future<int> getInt1(BuildContext context) async {
+    showMySnackBar(context, "Get Int 1");
+    return 2;
+  }
+
+  Future<int> getInt2(BuildContext context) async {
+    await Future.delayed(const Duration(seconds: 10));
+    showMySnackBar(context, "Get Int 2");
+    return 5;
   }
 }
 
-/// Stateful *
-class MyWidget2 extends StatefulWidget {
-  final bool isLoading;
-
-  MyWidget2(this.isLoading);
-
-  @override
-  State<StatefulWidget> createState() {
-    return MyWidget2State();
-  }
+void showMySnackBar(BuildContext context, String msg) {
+  final snackBar = SnackBar(
+    content: Text(msg),
+    duration: const Duration(seconds: 1),
+    action: SnackBarAction(
+      label: 'Close',
+      onPressed: () {
+        /** Hide SnackBar **/
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      },
+    ),
+  );
+  /** Show SnackBar **/
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
 
-class MyWidget2State extends State<MyWidget2> {
-
-  late bool _localLoading ;
-
-  /// initSate is function run before function @build
-  @override
-  void initState() {
-    super.initState();
-    _localLoading = widget.isLoading;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _localLoading
-        ? const CircularProgressIndicator()
-        : FloatingActionButton(onPressed: onClickButton);
-  }
-
-  void onClickButton() {
-    setState(() {
-      _localLoading = true ;
-    });
-  }
-}
