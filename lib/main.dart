@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:learn_flutter/service.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -6,10 +8,10 @@ void main() {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.amber,
-          title: const Text("Lear Flutter"),
+          title: const Text("Learn Flutter"),
         ),
-        body: Center(
-          child: MyWidget2(false),
+        body: const Center(
+          child: FlutterCallNative(),
         ),
       ),
     ),
@@ -17,55 +19,51 @@ void main() {
   ));
 }
 
-/// Stateless *
-class MyWidget extends StatelessWidget {
-  final bool isLoading;
-
-  MyWidget(this.isLoading);
+class FlutterCallNative extends StatelessWidget {
+  const FlutterCallNative({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const CircularProgressIndicator();
-    } else {
-      return const Text(" Stateless");
-    }
+    Service service = Service();
+    return FutureBuilder<String>(
+      future: service.callMethodNative(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else {
+          return Text("Text from Native : ${snapshot.data}");
+        }
+      },
+    );
   }
 }
 
-/// Stateful *
-class MyWidget2 extends StatefulWidget {
-  final bool isLoading;
-
-  MyWidget2(this.isLoading);
+class NativeCallFlutter extends StatefulWidget {
+  const NativeCallFlutter({super.key});
 
   @override
-  State<StatefulWidget> createState() {
-    return MyWidget2State();
-  }
+  State<StatefulWidget> createState() => _NativeCallFlutter();
 }
 
-class MyWidget2State extends State<MyWidget2> {
+class _NativeCallFlutter extends State<NativeCallFlutter> {
+  String dataFromNative = 'isEmpty';
 
-  late bool _localLoading ;
-
-  /// initSate is function run before function @build
   @override
   void initState() {
     super.initState();
-    _localLoading = widget.isLoading;
+    const MethodChannel channel = MethodChannel('chanel_name');
+    channel.setMethodCallHandler((call) async {
+      if (call.method == 'receiveData') {
+        String data = call.arguments['data'];
+        setState(() {
+          dataFromNative = data;
+        });
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return _localLoading
-        ? const CircularProgressIndicator()
-        : FloatingActionButton(onPressed: onClickButton);
-  }
-
-  void onClickButton() {
-    setState(() {
-      _localLoading = true ;
-    });
+    return Text('Data send from Native: $dataFromNative');
   }
 }
