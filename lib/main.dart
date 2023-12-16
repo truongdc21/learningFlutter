@@ -1,71 +1,55 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MaterialApp(
-    home: SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.amber,
-          title: const Text("Lear Flutter"),
-        ),
-        body: Center(
-          child: MyWidget2(false),
-        ),
-      ),
+  runApp(
+    // Use MyInherited as native app
+    MyInheritedWidget(
+      data: 'Hello from InheritedWidget!',
+      child: MyApp(),
     ),
-    debugShowCheckedModeBanner: false,
-  ));
+  );
 }
 
-/// Stateless *
-class MyWidget extends StatelessWidget {
-  final bool isLoading;
-
-  MyWidget(this.isLoading);
-
+// App native Widgets
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const CircularProgressIndicator();
-    } else {
-      return const Text(" Stateless");
-    }
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('InheritedWidget Example'),
+        ),
+        body: MyTextWidget(),
+      ),
+    );
   }
 }
 
-/// Stateful *
-class MyWidget2 extends StatefulWidget {
-  final bool isLoading;
+/// My Inherited *
+class MyInheritedWidget extends InheritedWidget {
+  final String data;
 
-  MyWidget2(this.isLoading);
+  MyInheritedWidget({Key? key, required Widget child, required this.data})
+      : super(key: key, child: child);
+
+  static MyInheritedWidget? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<MyInheritedWidget>();
+  }
 
   @override
-  State<StatefulWidget> createState() {
-    return MyWidget2State();
+  bool updateShouldNotify(MyInheritedWidget oldWidget) {
+    return oldWidget.data != data;
   }
 }
 
-class MyWidget2State extends State<MyWidget2> {
 
-  late bool _localLoading ;
-
-  /// initSate is function run before function @build
-  @override
-  void initState() {
-    super.initState();
-    _localLoading = widget.isLoading;
-  }
-
+// Widget use MyInheritedWidget
+class MyTextWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return _localLoading
-        ? const CircularProgressIndicator()
-        : FloatingActionButton(onPressed: onClickButton);
-  }
-
-  void onClickButton() {
-    setState(() {
-      _localLoading = true ;
-    });
+    // Use MyInheritedWidget.of to access shared values
+    final inheritedData = MyInheritedWidget.of(context)?.data ?? 'Default Data';
+    return Text(inheritedData);
   }
 }
+
